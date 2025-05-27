@@ -1,4 +1,5 @@
 # 🍔 CALORIE TRACKER - AI POWERED FOOD ANALYZER 
+Link : https://subhro27.github.io/calorie-app/
 
 A modern, sleek Calorie Tracker web application that uses the **Groq LLaMA-4 Scout API** to detect food and estimate nutritional values (Calories, Protein, Carbs, Fats) from an uploaded image or a live photo. It also integrates **ImgBB API** to securely host and retrieve image URLs.
 
