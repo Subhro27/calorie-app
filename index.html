@@ -1,0 +1,682 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Calorie Tracker</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            min-height: 100vh;
+            background: linear-gradient(135deg, #0f0f1a, #1c2526);
+            color: #e0e0e0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+            overflow-x: hidden;
+            position: relative;
+        }
+
+        .particles {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: -1;
+        }
+
+        .particle {
+            position: absolute;
+            background: rgba(0, 221, 235, 0.3); /* Updated to cyan-blue */
+            border-radius: 50%;
+            animation: float 15s infinite linear;
+            box-shadow: 0 0 10px rgba(0, 221, 235, 0.5); /* Updated shadow */
+        }
+
+        @keyframes float {
+            0% { transform: translateY(100vh) scale(0.8); }
+            100% { transform: translateY(-100vh) scale(1.2); }
+        }
+
+        .container {
+            max-width: 1200px;
+            width: 100%;
+            padding: 20px;
+            position: relative;
+            z-index: 1;
+        }
+
+        h1 {
+            text-align: center;
+            font-size: 2.8rem;
+            margin-bottom: 30px;
+            color: #00ddeb; /* Updated to cyan-blue */
+            font-weight: 600;
+            text-shadow: 0 0 15px rgba(0, 221, 235, 0.7), 0 0 30px rgba(0, 221, 235, 0.3); /* Updated shadow */
+            letter-spacing: 1px;
+        }
+
+        .input-section {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 20px;
+            margin-bottom: 40px;
+        }
+
+        .upload-area {
+            background: rgba(255, 255, 255, 0.05);
+            border: 2px dashed #00ddeb; /* Updated border color */
+            border-radius: 20px;
+            padding: 30px;
+            text-align: center;
+            width: 100%;
+            max-width: 500px;
+            transition: all 0.3s ease;
+            position: relative;
+            box-shadow: 0 0 20px rgba(0, 221, 235, 0.2); /* Updated shadow */
+            overflow: hidden;
+        }
+
+        .upload-area::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: radial-gradient(circle, rgba(0, 221, 235, 0.1) 0%, transparent 70%); /* Updated gradient */
+            opacity: 0.5;
+            z-index: -1;
+        }
+
+        .upload-area:hover {
+            background: rgba(255, 255, 255, 0.1);
+            transform: scale(1.03);
+            box-shadow: 0 0 30px rgba(0, 221, 235, 0.4); /* Updated shadow */
+        }
+
+        .upload-area p {
+            font-size: 1.2rem;
+            margin-bottom: 20px;
+            color: #b0b0b0;
+            font-weight: 500;
+            text-shadow: 0 0 5px rgba(0, 0, 0, 0.5);
+        }
+
+        .btn {
+            background: linear-gradient(90deg, #00ddeb, #0077b6); /* Updated gradient */
+            color: #ffffff;
+            padding: 12px 24px;
+            border: none;
+            border-radius: 25px;
+            font-size: 1rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .btn::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 0;
+            height: 0;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 50%;
+            transform: translate(-50%, -50%);
+            transition: width 0.4s ease, height 0.4s ease;
+        }
+
+        .btn:hover::after {
+            width: 200px;
+            height: 200px;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 20px rgba(0, 221, 235, 0.6); /* Updated shadow */
+        }
+
+        #preview {
+            max-width: 100%;
+            max-height: 200px;
+            border-radius: 10px;
+            margin-top: 20px;
+            display: none;
+            border: 1px solid rgba(0, 221, 235, 0.3); /* Updated border */
+        }
+
+        .progress-container {
+            width: 100%;
+            max-width: 500px;
+            margin: 20px auto;
+            display: none;
+        }
+
+        .progress-bar {
+            width: 0%;
+            height: 8px;
+            background: linear-gradient(90deg, #00ddeb, #0077b6); /* Updated gradient */
+            border-radius: 4px;
+            transition: width 0.3s ease;
+        }
+
+        .progress-bg {
+            width: 100%;
+            height: 8px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 4px;
+        }
+
+        .progress-text {
+            text-align: center;
+            margin-top: 10px;
+            font-size: 1rem;
+            color: #d1d5db;
+            font-weight: 500;
+            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.4);
+        }
+
+        .results {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 20px;
+        }
+
+        .results p {
+            color: #ff6b6b;
+            font-size: 1.1rem;
+            font-weight: 500;
+            text-align: center;
+            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.4);
+        }
+
+        .results a {
+            color: #93c5fd;
+            text-decoration: underline;
+        }
+
+        .card {
+            background: linear-gradient(145deg, rgba(255, 255, 255, 0.08), rgba(255, 255, 255, 0.04));
+            border-radius: 15px;
+            padding: 20px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3), 0 0 20px rgba(0, 221, 235, 0.2); /* Updated shadow */
+            transition: all 0.3s ease;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: radial-gradient(circle, rgba(0, 221, 235, 0.1) 0%, transparent 70%); /* Updated gradient */
+            opacity: 0.3;
+            z-index: -1;
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+            background: linear-gradient(145deg, rgba(255, 255, 255, 0.12), rgba(255, 255, 255, 0.08));
+            box-shadow: 0 8px 25px rgba(0, 221, 235, 0.4); /* Updated shadow */
+        }
+
+        .card h3 {
+            font-size: 1.5rem;
+            color: #00ddeb; /* Updated to cyan-blue */
+            font-weight: 600;
+            margin-bottom: 15px;
+            text-shadow: 0 0 5px rgba(0, 221, 235, 0.5); /* Updated shadow */
+        }
+
+        .nutrition-info {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 15px;
+            padding: 10px 0;
+        }
+
+        .nutrition-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            width: 100px;
+            gap: 8px;
+        }
+
+        .nutrition-item input[type="range"] {
+            -webkit-appearance: none;
+            width: 100%;
+            height: 8px;
+            background: linear-gradient(90deg, #00ddeb, #0077b6); /* Updated gradient */
+            border-radius: 4px;
+            outline: none;
+            opacity: 0.9;
+            transition: opacity 0.3s ease;
+        }
+
+        .nutrition-item input[type="range"]:hover {
+            opacity: 1;
+        }
+
+        .nutrition-item input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 16px;
+            height: 16px;
+            background: #ffffff;
+            border-radius: 50%;
+            cursor: pointer;
+            box-shadow: 0 0 5px rgba(0, 221, 235, 0.5); /* Updated shadow */
+        }
+
+        .nutrition-item input[type="range"]::-moz-range-thumb {
+            width: 16px;
+            height: 16px;
+            background: #ffffff;
+            border-radius: 50%;
+            cursor: pointer;
+            box-shadow: 0 0 5px rgba(0, 221, 235, 0.5); /* Updated shadow */
+        }
+
+        .nutrition-item input[type="range"]::-webkit-slider-runnable-track {
+            background: rgba(255, 255, 255, 0.1);
+            height: 8px;
+            border-radius: 4px;
+        }
+
+        .nutrition-item input[type="range"]::-moz-range-track {
+            background: rgba(255, 255, 255, 0.1);
+            height: 8px;
+            border-radius: 4px;
+        }
+
+        .nutrition-item .value {
+            font-size: 0.95rem;
+            color: #d1d5db;
+            font-weight: 500;
+            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.4);
+        }
+
+        .nutrition-item .label {
+            font-size: 0.75rem;
+            color: #e2e8f0;
+            font-weight: 500;
+            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.4);
+        }
+
+        .loader {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #00ddeb; /* Updated color */
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 20px auto;
+            display: none;
+            box-shadow: 0 0 10px rgba(0, 221, 235, 0.5); /* Updated shadow */
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        video {
+            max-width: 100%;
+            max-height: 200px;
+            border-radius: 10px;
+            display: none;
+            border: 1px solid rgba(0, 221, 235, 0.3); /* Updated border */
+        }
+
+        @media (max-width: 768px) {
+            h1 {
+                font-size: 2.2rem;
+            }
+
+            .upload-area {
+                padding: 20px;
+            }
+
+            .upload-area p {
+                font-size: 1.1rem;
+            }
+
+            .btn {
+                padding: 10px 20px;
+                font-size: 0.9rem;
+            }
+
+            .card {
+                padding: 15px;
+            }
+
+            .card h3 {
+                font-size: 1.3rem;
+            }
+
+            .nutrition-item {
+                width: 90px;
+            }
+
+            .nutrition-item .value {
+                font-size: 0.9rem;
+            }
+
+            .nutrition-item .label {
+                font-size: 0.7rem;
+            }
+        }
+
+        @media (max-width: 480px) {
+            h1 {
+                font-size: 1.8rem;
+            }
+
+            .upload-area {
+                padding: 15px;
+            }
+
+            .upload-area p {
+                font-size: 1rem;
+            }
+
+            .btn {
+                padding: 8px 16px;
+                font-size: 0.8rem;
+            }
+
+            .nutrition-item {
+                width: 80px;
+            }
+
+            .nutrition-item .value {
+                font-size: 0.85rem;
+            }
+
+            .nutrition-item .label {
+                font-size: 0.65rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="particles" id="particles"></div>
+    <div class="container">
+        <h1>Calorie Tracker</h1>
+        <div class="input-section">
+            <div class="upload-area">
+                <p>Upload a food photo or take a picture</p>
+                <input type="file" id="fileInput" accept="image/*" style="display: none;">
+                <button class="btn" onclick="document.getElementById('fileInput').click()">Upload Photo</button>
+                <button class="btn" onclick="startCamera()">Take Picture</button>
+                <video id="video" autoplay></video>
+                <canvas id="canvas" style="display: none;"></canvas>
+                <img id="preview" alt="Image Preview">
+            </div>
+        </div>
+        <div class="progress-container" id="progressContainer">
+            <div class="progress-bg">
+                <div class="progress-bar" id="progressBar"></div>
+            </div>
+            <div class="progress-text" id="progressText">Uploading image...</div>
+        </div>
+        <div class="loader" id="loader"></div>
+        <div class="results" id="results"></div>
+    </div>
+
+    <script>
+        // Particle Animation
+        const particlesContainer = document.getElementById('particles');
+        function createParticle() {
+            const particle = document.createElement('div');
+            particle.className = 'particle';
+            particle.style.width = `${Math.random() * 5 + 5}px`;
+            particle.style.height = particle.style.width;
+            particle.style.left = `${Math.random() * 100}vw`;
+            particle.style.animationDuration = `${Math.random() * 10 + 10}s`;
+            particle.style.opacity = Math.random() * 0.3 + 0.1;
+            particlesContainer.appendChild(particle);
+            setTimeout(() => particle.remove(), 15000);
+        }
+        setInterval(createParticle, 500);
+
+        const fileInput = document.getElementById('fileInput');
+        const video = document.getElementById('video');
+        const canvas = document.getElementById('canvas');
+        const preview = document.getElementById('preview');
+        const loader = document.getElementById('loader');
+        const results = document.getElementById('results');
+        const progressContainer = document.getElementById('progressContainer');
+        const progressBar = document.getElementById('progressBar');
+        const progressText = document.getElementById('progressText');
+
+        // Handle file upload
+        fileInput.addEventListener('change', (e) => {
+            const file = e.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    preview.src = e.target.result;
+                    preview.style.display = 'block';
+                    video.style.display = 'none';
+                    fetchCalorieData(file);
+                };
+                reader.readAsDataURL(file);
+            }
+        });
+
+        // Start camera
+        async function startCamera() {
+            try {
+                const stream = await navigator.mediaDevices.getUserMedia({ video: true });
+                video.srcObject = stream;
+                video.style.display = 'block';
+                preview.style.display = 'none';
+                const captureBtn = document.createElement('button');
+                captureBtn.className = 'btn';
+                captureBtn.textContent = 'Capture';
+                captureBtn.onclick = captureImage;
+                document.querySelector('.upload-area').appendChild(captureBtn);
+            } catch (err) {
+                console.error('Camera access error:', err);
+                alert('Unable to access camera. Please upload an image instead.');
+            }
+        }
+
+        // Capture image from video
+        function captureImage() {
+            canvas.width = video.videoWidth;
+            canvas.height = video.videoHeight;
+            canvas.getContext('2d').drawImage(video, 0, 0);
+            const imageData = canvas.toDataURL('image/jpeg');
+            preview.src = imageData;
+            preview.style.display = 'block';
+            video.style.display = 'none';
+            video.srcObject.getTracks().forEach(track => track.stop());
+            const captureBtn = document.querySelector('.upload-area button:last-child');
+            if (captureBtn && captureBtn.textContent === 'Capture') captureBtn.remove();
+            fetch(imageData)
+                .then(res => res.blob())
+                .then(blob => fetchCalorieData(blob));
+        }
+
+        // Update progress bar
+        function updateProgress(percent, text) {
+            progressContainer.style.display = 'block';
+            progressBar.style.width = `${percent}%`;
+            progressText.textContent = text;
+        }
+
+        // API call to upload image to ImgBB
+        async function uploadImageToImgBB(file) {
+            const formData = new FormData();
+            formData.append('image', file);
+            const response = await fetch('https://api.imgbb.com/1/upload?key=4d2d54d67baa160bb89473d9495f600f', {
+                method: 'POST',
+                body: formData
+            });
+            if (!response.ok) {
+                const errorData = await response.json();
+                throw new Error(`Failed to upload image to ImgBB: ${errorData.error?.message || response.statusText}`);
+            }
+            const data = await response.json();
+            return data.data.url;
+        }
+
+        // API call to Groq for calorie data
+        async function fetchCalorieFromGroq(imageUrl) {
+            const response = await fetch('https://api.groq.com/openai/v1/chat/completions', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': 'Bearer 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',
+                    'Cookie': '__cf_bm=LWV1pJSeoJ2wTvv52SAr3jE9NG4K32tqBXbB9MhITqQ-1742662265-1.0.1.1-e0JTSb37i.AUEeTPNJ0AQJfvcwWp9AEVgtBz4XSdIEU.Kj0VKJNPpJg8prnslEf6KGwl1gKk93yPgHY5W9UeJAwG7p.u4mK19v.b_HWJhIs'
+                },
+                body: JSON.stringify({
+                    messages: [
+                        {
+                            role: 'user',
+                            content: [
+                                {
+                                    type: 'text',
+                                    text: 'Give calories of each item in this image in this below JSON format only\n {items:[{item_name:"name of item", total_calories:"in gm", total_protein:"in gm", total_carbs:"in gm", total_fats:"in gm"},...]}'
+                                },
+                                {
+                                    type: 'image_url',
+                                    image_url: {
+                                        url: imageUrl
+                                    }
+                                }
+                            ]
+                        }
+                    ],
+                    model: 'meta-llama/llama-4-scout-17b-16e-instruct',
+                    temperature: 1,
+                    max_completion_tokens: 1024,
+                    top_p: 1,
+                    stream: false,
+                    response_format: {
+                        type: 'json_object'
+                    },
+                    stop: null
+                })
+            });
+
+            if (!response.ok) {
+                const errorData = await response.json();
+                throw new Error(`Groq API error: ${errorData.error?.message || response.statusText}`);
+            }
+
+            const data = await response.json();
+            console.log('Groq API Response:', data); // Debug log
+
+            if (!data.choices || !data.choices[0] || !data.choices[0].message || !data.choices[0].message.content) {
+                throw new Error('Unexpected response structure from Groq API');
+            }
+
+            let parsedContent;
+            try {
+                parsedContent = JSON.parse(data.choices[0].message.content);
+            } catch (parseError) {
+                throw new Error(`Failed to parse Groq API response content: ${parseError.message}\nContent: ${data.choices[0].message.content}`);
+            }
+
+            if (!parsedContent.items || !Array.isArray(parsedContent.items)) {
+                throw new Error('Groq API response does not contain an "items" array');
+            }
+
+            return parsedContent.items;
+        }
+
+        // Main function to handle API calls
+        async function fetchCalorieData(file) {
+            loader.style.display = 'block';
+            results.innerHTML = '';
+            try {
+                // Step 1: Upload image to ImgBB
+                updateProgress(20, 'Uploading image...');
+                const imageUrl = await uploadImageToImgBB(file);
+                updateProgress(50, 'Image uploaded. Analyzing...');
+
+                // Step 2: Fetch calorie data from Groq
+                const calorieData = await fetchCalorieFromGroq(imageUrl);
+                updateProgress(100, 'Analysis complete!');
+                setTimeout(() => {
+                    progressContainer.style.display = 'none';
+                    displayResults(calorieData);
+                }, 500);
+            } catch (error) {
+                console.error('Error:', error);
+                results.innerHTML = `<p style="color: #ff6b6b;">Error: ${error.message}. Please check <a href="https://console.groq.com/docs/deprecations" target="_blank">Groq deprecations</a> for supported models.</p>`;
+                progressContainer.style.display = 'none';
+            } finally {
+                loader.style.display = 'none';
+            }
+        }
+
+        // Display results in cards with sliders
+        function displayResults(data) {
+            data.forEach(item => {
+                const card = document.createElement('div');
+                card.className = 'card';
+                card.innerHTML = `
+                    <h3>${item.item_name}</h3>
+                    <div class="nutrition-info">
+                        <div class="nutrition-item">
+                            <input type="range" class="nutrition-slider calories" min="0" max="500" value="0" disabled>
+                            <span class="value">${item.total_calories}g</span>
+                            <span class="label">Calories</span>
+                        </div>
+                        <div class="nutrition-item">
+                            <input type="range" class="nutrition-slider protein" min="0" max="50" value="0" disabled>
+                            <span class="value">${item.total_protein}g</span>
+                            <span class="label">Protein</span>
+                        </div>
+                        <div class="nutrition-item">
+                            <input type="range" class="nutrition-slider carbs" min="0" max="100" value="0" disabled>
+                            <span class="value">${item.total_carbs}g</span>
+                            <span class="label">Carbs</span>
+                        </div>
+                        <div class="nutrition-item">
+                            <input type="range" class="nutrition-slider fats" min="0" max="50" value="0" disabled>
+                            <span class="value">${item.total_fats}g</span>
+                            <span class="label">Fats</span>
+                        </div>
+                    </div>
+                `;
+                results.appendChild(card);
+
+                // Set slider values
+                const maxValues = { calories: 500, protein: 50, carbs: 100, fats: 50 };
+                const sliders = card.querySelectorAll('.nutrition-slider');
+                sliders.forEach(slider => {
+                    const type = slider.classList[1];
+                    const value = parseFloat(item[`total_${type}`]);
+                    const max = maxValues[type];
+                    slider.value = Math.min(value, max);
+                });
+            });
+        }
+    </script>
+</body>
+</html>
